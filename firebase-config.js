@@ -1,12 +1,11 @@
-// Firebase 專案：待建立（見 README 多人連線設定步驟）
-// apiKey 含「貼上」字樣時，host.html / player.html 自動切換為 BroadcastChannel 本機測試模式
+// Firebase 專案：spot-the-difference-10a2b
 // 這組 config 設計上就是公開給瀏覽器用的，防護在資料庫規則層（database.rules.json）
 const firebaseConfig = {
-  apiKey: "請貼上你的 Firebase apiKey",
-  authDomain: "your-project.firebaseapp.com",
-  databaseURL: "https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "your-project",
-  storageBucket: "your-project.firebasestorage.app",
-  messagingSenderId: "0",
-  appId: "1:0:web:0",
+  apiKey: "AIzaSyCHtiTIeg1mzrXzDWvxbmyztl-Uzqrzd-s",
+  authDomain: "spot-the-difference-10a2b.firebaseapp.com",
+  databaseURL: "https://spot-the-difference-10a2b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "spot-the-difference-10a2b",
+  storageBucket: "spot-the-difference-10a2b.firebasestorage.app",
+  messagingSenderId: "961287826409",
+  appId: "1:961287826409:web:3abe5258b97965def0f978",
 };
