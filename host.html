@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>找不同大挑戰！主控端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#faf6f0] text-[#3c3c3c] min-h-screen flex flex-col justify-between select-none overflow-x-hidden">
+
+<header class="bg-white/80 border-b border-stone-200 p-4 shadow-sm relative z-20">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div class="bg-[#8fa89b] p-2.5 rounded-xl shadow-sm text-white flex items-center justify-center">
+                <span class="text-3xl filter drop-shadow">🔍</span>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black text-[#2c2c2c] tracking-widest">找不同大挑戰！<span class="text-sm font-bold text-[#8c8273] align-middle">主控端</span></h1>
+                <p class="text-xs text-[#8c8273] font-bold tracking-wider mt-0.5 font-sans" id="mode-badge">FIND THE DIFFERENCES • 連線模式檢查中…</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-right">
+                <p class="text-xs text-stone-500 font-bold">玩家加入網址（分享給大家）：</p>
+                <p id="join-url" class="text-sm font-mono text-[#7a9a83] font-bold break-all"></p>
+            </div>
+            <img id="join-qr" class="w-24 h-24 rounded-lg border border-stone-200 shadow-sm bg-white" alt="掃描加入玩家端 QR Code">
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow flex flex-col lg:flex-row items-stretch justify-center gap-4 p-3 md:p-6 relative z-10 max-w-7xl mx-auto w-full">
+    <div class="flex-grow">
+        <div id="table-frame" class="w-full wood-border rounded-[2.5rem] overflow-hidden">
+            <div class="velvet-table p-6 sm:p-8 md:p-12 relative flex flex-col items-center justify-center min-h-[480px]">
+                <div id="phase-banner" class="absolute top-4 sm:top-6 bg-white border border-[#e6dfd3] text-[#3c3c3c] font-black px-6 py-2.5 rounded-full shadow-md text-sm sm:text-base tracking-widest uppercase z-10 text-center">
+                    請設定題目參數，再點擊「🏁 開始遊戲」！
+                </div>
+                <div class="w-full flex flex-wrap justify-between items-center gap-4 mt-16 mb-2 pb-3 border-b border-stone-300/40">
+                    <div class="bg-white/80 px-4 py-1.5 rounded-xl border border-stone-200 text-center min-w-[80px] shadow-sm flex items-center gap-2 text-xs sm:text-sm font-bold">
+                        <span class="text-stone-500">關卡</span>
+                        <span id="current-round" class="text-lg font-black text-[#8b7e6b] font-mono">0</span>
+                    </div>
+                    <div class="bg-white/80 px-4 py-1.5 rounded-xl border border-stone-200 text-center shadow-sm flex items-center gap-2 text-xs sm:text-sm font-bold">
+                        <span class="text-stone-500">已加入</span>
+                        <span id="player-count" class="text-lg font-black text-[#7a9a83] font-mono">0</span> 人
+                    </div>
+                </div>
+                <div id="cards-container" class="flex flex-wrap gap-4 sm:gap-6 w-full my-8 justify-center items-center min-h-[220px]">
+                    <div class="text-center text-stone-400 py-8 w-full text-lg tracking-wider font-medium flex flex-col items-center gap-3">
+                        <span class="text-5xl animate-bounce">🃏</span>
+                        <span>尚未開始，這裡會顯示題目預覽（供投影用，不可點擊作答）</span>
+                    </div>
+                </div>
+                <div class="w-full max-w-2xl flex flex-col items-center gap-2 mt-4">
+                    <div class="w-full bg-slate-950 rounded-full h-4 p-0.5 border border-amber-500/20 overflow-hidden relative">
+                        <div id="timer-bar" class="bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 h-full rounded-full transition-all duration-100" style="width: 0%;"></div>
+                    </div>
+                    <div id="timer-text" class="text-amber-400 font-mono font-bold text-sm tracking-widest">0.0 秒</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 即時排行榜 -->
+    <div class="w-full lg:w-80 bg-white border border-stone-200 rounded-2xl shadow-sm p-4 flex flex-col">
+        <h2 class="font-black text-lg text-[#2c2c2c] mb-3 flex items-center gap-2">🏆 即時排行榜</h2>
+        <div id="leaderboard" class="flex flex-col gap-2 overflow-y-auto flex-grow max-h-[500px]">
+            <p class="text-sm text-stone-400 text-center py-6">尚無玩家加入</p>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-white/90 border-t border-stone-200 p-4 relative z-20 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4 font-sans">
+        <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+            <div class="flex items-center gap-3">
+                <span class="text-xs sm:text-sm text-stone-500 font-bold uppercase tracking-wider">🃏 卡片數量:</span>
+                <select id="setting-card-count" class="bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-bold">
+                    <option value="3">3 張 (簡單)</option>
+                    <option value="4">4 張 (中等)</option>
+                    <option value="5" selected>5 張 (標準)</option>
+                    <option value="6">6 張 (大師)</option>
+                    <option value="8">8 張 (地獄)</option>
+                    <option value="10">10 張 (極限挑戰)</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs sm:text-sm text-stone-500 font-bold uppercase tracking-wider">🧠 記憶秒數:</span>
+                <select id="setting-mem-time" class="bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-bold">
+                    <option value="3">3 秒 (究極大師)</option>
+                    <option value="5" selected>5 秒 (標準難度)</option>
+                    <option value="8">8 秒 (輕鬆休閒)</option>
+                    <option value="12">12 秒 (新手練習)</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs sm:text-sm text-stone-500 font-bold uppercase tracking-wider">⚡ 答題秒數:</span>
+                <select id="setting-guess-time" class="bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-bold">
+                    <option value="5">5 秒 (極限挑戰)</option>
+                    <option value="10" selected>10 秒 (標準節奏)</option>
+                    <option value="15">15 秒 (充裕思索)</option>
+                </select>
+            </div>
+            <button id="btn-sound-toggle" class="bg-stone-100 hover:bg-stone-200 text-xs sm:text-sm px-4 py-2 rounded-lg font-bold text-stone-600 border border-stone-200">
+                🔊 <span id="sound-text">音效：開啟</span>
+            </button>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="btn-reset" class="bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold px-5 py-3 rounded-xl border border-stone-200 text-sm">🔄 重設遊戲</button>
+            <button id="btn-start" class="bg-[#8fa89b] hover:bg-[#7e978a] text-white font-black px-8 py-3.5 rounded-xl shadow-sm active:scale-95 transition-all text-base tracking-widest uppercase whitespace-nowrap">
+                🏁 開始遊戲
+            </button>
+            <button id="btn-next" class="hidden bg-[#d8c3a5] hover:bg-[#cbb698] text-[#3c3c3c] font-black px-8 py-3.5 rounded-xl shadow-sm active:scale-95 transition-all text-base tracking-widest uppercase whitespace-nowrap">
+                下一關 ➡️
+            </button>
+            <button id="btn-finish" class="hidden bg-[#b8965c] hover:bg-[#a6864f] text-white font-black px-8 py-3.5 rounded-xl shadow-sm active:scale-95 transition-all text-base tracking-widest uppercase whitespace-nowrap">
+                🏆 公布成績
+            </button>
+        </div>
+    </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="shared.js"></script>
+<script src="sync.js"></script>
+<script>
+const cardsContainer = document.getElementById('cards-container');
+const phaseBanner = document.getElementById('phase-banner');
+const timerBar = document.getElementById('timer-bar');
+const timerText = document.getElementById('timer-text');
+const roundDisplay = document.getElementById('current-round');
+const playerCountEl = document.getElementById('player-count');
+const leaderboardEl = document.getElementById('leaderboard');
+const modeBadge = document.getElementById('mode-badge');
+const joinUrlEl = document.getElementById('join-url');
+
+const btnStart = document.getElementById('btn-start');
+const btnNext = document.getElementById('btn-next');
+const btnFinish = document.getElementById('btn-finish');
+const btnReset = document.getElementById('btn-reset');
+const btnSoundToggle = document.getElementById('btn-sound-toggle');
+const soundText = document.getElementById('sound-text');
+const settingCardCount = document.getElementById('setting-card-count');
+const settingMemTime = document.getElementById('setting-mem-time');
+const settingGuessTime = document.getElementById('setting-guess-time');
+
+modeBadge.textContent = LOCAL_MODE
+    ? 'FIND THE DIFFERENCES • 本機測試模式（BroadcastChannel，僅同機分頁互通）'
+    : 'FIND THE DIFFERENCES • 已連線 Firebase，可跨裝置遊玩';
+const joinUrl = new URL('player.html', location.href).href;
+joinUrlEl.textContent = joinUrl;
+document.getElementById('join-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(joinUrl)}`;
+
+let currentRoundIndex = 0;
+let roundCards = [];
+let changedIndex = -1;
+let timerInterval = null;
+let timeLeft = 0;
+let maxTime = 0;
+
+btnSoundToggle.addEventListener('click', () => {
+    isSoundOn = !isSoundOn;
+    soundText.textContent = isSoundOn ? '音效：開啟' : '音效：關閉';
+    if (isSoundOn) { initAudio(); playSound('magic'); }
+});
+
+btnStart.addEventListener('click', () => { initAudio(); startRound(); });
+btnNext.addEventListener('click', () => { initAudio(); startRound(); });
+btnFinish.addEventListener('click', () => {
+    initAudio(); playSound('correct');
+    writeRoom({ status: 'finished' });
+    phaseBanner.textContent = '🏆 成績已公布！玩家手機會顯示最終排名';
+});
+btnReset.addEventListener('click', () => {
+    if (!confirm('確定要清空排行榜並重新開始嗎？')) return;
+    clearInterval(timerInterval);
+    currentRoundIndex = 0;
+    roundDisplay.textContent = '0';
+    btnStart.classList.remove('hidden');
+    btnNext.classList.add('hidden');
+    btnFinish.classList.add('hidden');
+    phaseBanner.textContent = '請設定題目參數，再點擊「🏁 開始遊戲」！';
+    cardsContainer.innerHTML = `<div class="text-center text-stone-400 py-8 w-full text-lg tracking-wider font-medium flex flex-col items-center gap-3"><span class="text-5xl animate-bounce">🃏</span><span>尚未開始，這裡會顯示題目預覽（供投影用，不可點擊作答）</span></div>`;
+    resetRoom();
+});
+
+function startRound() {
+    clearInterval(timerInterval);
+    currentRoundIndex += 1;
+    roundDisplay.textContent = currentRoundIndex;
+    btnStart.classList.add('hidden');
+    btnNext.classList.add('hidden');
+    btnFinish.classList.add('hidden');
+
+    const cardCount = parseInt(settingCardCount.value);
+    const memTime = parseFloat(settingMemTime.value);
+    const guessTime = parseFloat(settingGuessTime.value);
+
+    const shuffled = [...cardsDatabase].sort(() => Math.random() - 0.5);
+    roundCards = shuffled.slice(0, cardCount);
+    changedIndex = Math.floor(Math.random() * cardCount);
+
+    renderCardGrid(cardsContainer, roundCards); // 主控端預覽不可點擊
+
+    const round = {
+        index: currentRoundIndex,
+        cardIds: roundCards.map((c) => c.id),
+        changedIndex,
+        memTime,
+        guessTime,
+        phaseStartAt: Date.now(),
+    };
+    writeRoom({ status: 'memorize', round });
+
+    phaseBanner.textContent = `記憶階段：玩家有 ${memTime} 秒記住這 ${cardCount} 張卡片！`;
+    playSound('magic');
+    maxTime = memTime; timeLeft = memTime;
+    updateTimerBar(timerBar, timerText, timeLeft, maxTime);
+
+    timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) { timeLeft = 0; clearInterval(timerInterval); enterHidePhase(round); }
+        else if (timeLeft <= 2.0 && Math.round(timeLeft * 10) % 10 === 0) playSound('tick');
+        updateTimerBar(timerBar, timerText, timeLeft, maxTime);
+    }, 100);
+}
+
+function enterHidePhase(round) {
+    phaseBanner.textContent = '悄悄修改中... 請聚精會神！';
+    flipCardGrid(cardsContainer, true);
+    playSound('flip');
+    writeRoom({ status: 'hide', round: { ...round, phaseStartAt: Date.now() } });
+
+    setTimeout(() => {
+        swapCardFront(cardsContainer, changedIndex, roundCards[changedIndex], 'B');
+        enterRevealPhase(round);
+    }, 1200);
+}
+
+function enterRevealPhase(round) {
+    const guessTime = round.guessTime;
+    phaseBanner.textContent = `答題階段：玩家有 ${guessTime} 秒找出被修改的卡片！`;
+    flipCardGrid(cardsContainer, false);
+    playSound('flip');
+    writeRoom({ status: 'reveal', round: { ...round, phaseStartAt: Date.now() } });
+
+    maxTime = guessTime; timeLeft = guessTime;
+    updateTimerBar(timerBar, timerText, timeLeft, maxTime);
+
+    timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) { timeLeft = 0; clearInterval(timerInterval); endRound(round); }
+        else if (timeLeft <= 3.0 && Math.round(timeLeft * 10) % 10 === 0) playSound('tick');
+        updateTimerBar(timerBar, timerText, timeLeft, maxTime);
+    }, 100);
+}
+
+function endRound(round) {
+    phaseBanner.textContent = '本關結束！開下一關繼續比賽，或直接公布成績';
+    writeRoom({ status: 'ended', round });
+    btnNext.classList.remove('hidden');
+    btnFinish.classList.remove('hidden');
+}
+
+function renderLeaderboard(players) {
+    const list = Object.values(players || {}).sort((a, b) => b.score - a.score);
+    playerCountEl.textContent = list.length;
+    if (list.length === 0) {
+        leaderboardEl.innerHTML = '<p class="text-sm text-stone-400 text-center py-6">尚無玩家加入</p>';
+        return;
+    }
+    leaderboardEl.innerHTML = list.map((p, i) => `
+        <div class="flex items-center justify-between px-3 py-2 rounded-xl border ${i === 0 ? 'border-[#8fa89b] bg-[#8fa89b]/10' : 'border-stone-200 bg-stone-50'}">
+            <span class="font-bold text-sm text-stone-700">${i + 1}. ${p.name}${p.streak >= 2 ? ' 🔥' : ''}</span>
+            <span class="font-mono font-black text-[#7a9a83]">${String(p.score).padStart(4, '0')}</span>
+        </div>
+    `).join('');
+}
+
+onPlayers(renderLeaderboard);
+</script>
+</body>
+</html>

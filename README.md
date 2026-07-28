@@ -93,3 +93,40 @@ git push -u origin main
     },
     ```
 4.  儲存變更並在瀏覽器中重新整理，遊戲在進行隨機抽卡時便會載入您的自訂圖片！
+
+---
+
+## 🌐 多人連線模式（主控端 + 玩家各自手機作答）
+
+除了單機版 `index.html`，本專案另外提供**線上多人版**：你用 `host.html` 控制題目進度（記憶／隱藏／答題三階段跟單機版一樣），其他人用手機開 `player.html` 加入，畫面跟著你同步，但**各自獨立作答計分**（每人每題限猜一次，答對得分、答錯或超時 0 分，連勝有加成）。
+
+### 檔案
+| 檔案 | 用途 |
+|------|------|
+| `host.html` | 主控端：設定題目參數、控制記憶/隱藏/答題階段、即時排行榜 |
+| `player.html` | 玩家端：輸入名字加入，跟隨主控端進度各自作答 |
+| `shared.js` | 卡片資料庫、音效合成、卡片格線渲染（host/player 共用） |
+| `sync.js` | 連線同步邏輯（Firebase 或本機測試模式自動切換） |
+| `firebase-config.js` | ⚠️ 待填：Firebase 專案設定 |
+| `database.rules.json` | Firebase 資料庫安全規則（存查用，須在 Firebase 主控台貼上生效） |
+
+### 啟用步驟（一次性，約 10 分鐘）
+
+**A. 本機先試玩（不需要 Firebase）**
+1. 用任何本機伺服器開啟本資料夾（例如 VS Code 的 Live Server，或 `python3 -m http.server`）
+2. 開兩個分頁：`host.html` 當主控、`player.html` 當玩家——`firebase-config.js` 預設含「貼上」字樣，兩個頁面會自動切成 BroadcastChannel 本機測試模式（僅同一瀏覽器分頁間互通，適合先驗證流程）
+
+**B. 正式跨裝置連線——建 Firebase 資料庫**
+3. 到 [Firebase Console](https://console.firebase.google.com/) 建立新專案
+4. 左側「建構 → Realtime Database」→ 建立資料庫 → 地區選 `asia-southeast1` → 以**測試模式**啟動
+5. 資料庫「規則」分頁貼上 `database.rules.json` 的內容並發布
+6. 專案設定（齒輪）→ 一般 → 你的應用程式 → 新增「網頁應用程式」→ 把 `firebaseConfig` 整段貼進 `firebase-config.js`（這組 config 設計上就是公開給瀏覽器用的，防護在資料庫規則層）
+
+**C. 部署（GitHub Pages 或 Vercel 皆可，做法同單機版）**
+7. push 到 GitHub → 用 GitHub Pages 或 Vercel 部署整個資料夾
+8. 你開 `https://你的網址/host.html` 主控，把 `https://你的網址/player.html` 分享給其他人手機加入
+
+### 已知限制
+- 純前端無帳號驗證，知道玩家網址的人都能加入、都能看到自己的分數（無法防止惡意改分數，僅適合親友／課堂等信任場合）
+- 同名玩家會共用同一筆分數紀錄，請提醒大家用不同名字
+- 沒有做伺服器時間校正，答題計時以雙方裝置各自時鐘為準（一般手機／電腦時鐘誤差通常可忽略）

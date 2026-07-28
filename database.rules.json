@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "rooms": {
+      "spotdiff-main": {
+        "status": { ".read": true, ".write": true },
+        "round": { ".read": true, ".write": true },
+        "players": {
+          ".read": true,
+          "$name": { ".write": true }
+        }
+      }
+    }
+  }
+}
